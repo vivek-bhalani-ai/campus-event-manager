@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{% if mode == 'edit' %}Edit user{% else %}New user{% endif %}</h1>
+
+<form class="stack" method="post">
+  <label>First name <input name="firstName" required value="{{ user.firstName if user else '' }}"></label>
+  <label>Last name <input name="lastName" required value="{{ user.lastName if user else '' }}"></label>
+  <label>Email <input type="email" name="email" required value="{{ user.email if user else '' }}"></label>
+  <label>Department <input name="department" required value="{{ user.department if user else '' }}"></label>
+  <label>Role
+    <select name="role" required>
+      {% for r in ['student', 'teacher', 'staff'] %}
+        <option value="{{ r }}" {% if user and user.role == r %}selected{% endif %}>{{ r }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Interests (comma separated)
+    <input name="interests" value="{{ user.interests|join(', ') if user and user.interests is iterable and user.interests is not string else '' }}">
+  </label>
+  <div class="row">
+    <button type="submit">{% if mode == 'edit' %}Save changes{% else %}Create user{% endif %}</button>
+    <a class="reset" href="{{ url_for('users.index') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

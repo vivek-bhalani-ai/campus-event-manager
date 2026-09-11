@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row-between">
+  <h1>Events</h1>
+  <a class="button" href="{{ url_for('events.create') }}">New event</a>
+</div>
+
+<form class="filters" method="get">
+  <input type="search" name="search" placeholder="Search by title" value="{{ filters.get('search', '') }}">
+  <select name="category">
+    <option value="">All categories</option>
+    {% for c in categories %}
+      <option value="{{ c }}" {% if filters.get('category') == c %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+  <select name="tag">
+    <option value="">All tags</option>
+    {% for t in tags %}
+      <option value="{{ t }}" {% if filters.get('tag') == t %}selected{% endif %}>{{ t }}</option>
+    {% endfor %}
+  </select>
+  <select name="when">
+    <option value="">Past and upcoming</option>
+    <option value="upcoming" {% if filters.get('when') == 'upcoming' %}selected{% endif %}>Upcoming only</option>
+    <option value="past" {% if filters.get('when') == 'past' %}selected{% endif %}>Past only</option>
+  </select>
+  <select name="sort">
+    <option value="asc" {% if filters.get('sort') != 'desc' %}selected{% endif %}>Date, oldest first</option>
+    <option value="desc" {% if filters.get('sort') == 'desc' %}selected{% endif %}>Date, newest first</option>
+  </select>
+  <button type="submit">Apply</button>
+  <a class="reset" href="{{ url_for('events.index') }}">Reset</a>
+</form>
+
+<table>
+  <thead>
+    <tr><th>Title</th><th>Category</th><th>Starts</th><th>Location</th>
+        <th>Capacity</th><th>Confirmed</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+  {% for e in events %}
+    <tr>
+      <td>
+        <a href="{{ url_for('events.detail', event_id=e._id) }}">{{ e.title }}</a>
+        {% if e.isFull %}<span class="badge badge-full">Full</span>{% endif %}
+      </td>
+      <td>{{ e.category }}</td>
+      <td>{{ e.startDate|dt }}</td>
+      <td>{{ e.location.building }} &middot; {{ e.location.room }} &middot; {{ e.location.campus }}</td>
+      <td>{{ e.capacity }}</td>
+      <td>{{ e.confirmedCount }}</td>
+      <td class="actions">
+        <a href="{{ url_for('events.edit', event_id=e._id) }}">Edit</a>
+        <form method="post" action="{{ url_for('events.delete', event_id=e._id) }}"
+              onsubmit="return confirm('Delete this event?')">
+          <button class="link-button" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7" class="empty">No event matches these filters.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

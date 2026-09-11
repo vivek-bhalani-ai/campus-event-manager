@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Analytics</h1>
+<p class="hint">Every table on this page is produced by a MongoDB aggregation pipeline
+(<code>src/repositories/analytics_repo.py</code>).</p>
+
+<h2>A. Registrations by category</h2>
+<table>
+  <thead><tr><th>Category</th><th>Events</th><th>Confirmed registrations</th></tr></thead>
+  <tbody>
+  {% for r in by_category %}
+    <tr><td>{{ r._id }}</td><td>{{ r.eventCount }}</td><td>{{ r.registrations }}</td></tr>
+  {% else %}<tr><td colspan="3" class="empty">No data.</td></tr>{% endfor %}
+  </tbody>
+</table>
+
+<h2>B. Top 5 most popular events</h2>
+<table>
+  <thead><tr><th>Event</th><th>Category</th><th>Capacity</th><th>Confirmed</th><th>Occupancy</th></tr></thead>
+  <tbody>
+  {% for r in top_events %}
+    <tr>
+      <td><a href="{{ url_for('events.detail', event_id=r._id) }}">{{ r.title }}</a></td>
+      <td>{{ r.category }}</td><td>{{ r.capacity }}</td>
+      <td>{{ r.confirmedCount }}</td><td>{{ r.occupancy }}%</td>
+    </tr>
+  {% else %}<tr><td colspan="5" class="empty">No data.</td></tr>{% endfor %}
+  </tbody>
+</table>
+
+<h2>C. Users with no registration</h2>
+<table>
+  <thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Role</th></tr></thead>
+  <tbody>
+  {% for u in no_registration %}
+    <tr>
+      <td><a href="{{ url_for('users.detail', user_id=u._id) }}">{{ u.firstName }} {{ u.lastName }}</a></td>
+      <td>{{ u.email }}</td><td>{{ u.department }}</td><td>{{ u.role }}</td>
+    </tr>
+  {% else %}<tr><td colspan="4" class="empty">Every user is registered for at least one event.</td></tr>{% endfor %}
+  </tbody>
+</table>
+
+<h2>D. Events above average occupancy</h2>
+<p>Average occupancy across all events: <strong>{{ average_occupancy }}%</strong></p>
+<table>
+  <thead><tr><th>Event</th><th>Category</th><th>Capacity</th><th>Confirmed</th><th>Occupancy</th></tr></thead>
+  <tbody>
+  {% for r in above_average %}
+    <tr><td>{{ r.title }}</td><td>{{ r.category }}</td><td>{{ r.capacity }}</td>
+        <td>{{ r.confirmedCount }}</td><td>{{ r.occupancy }}%</td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No data.</td></tr>{% endfor %}
+  </tbody>
+</table>
+
+<h2>E. Most used tags</h2>
+<table>
+  <thead><tr><th>Tag</th><th>Events using it</th></tr></thead>
+  <tbody>
+  {% for t in tags %}
+    <tr><td>{{ t._id }}</td><td>{{ t.eventCount }}</td></tr>
+  {% else %}<tr><td colspan="2" class="empty">No data.</td></tr>{% endfor %}
+  </tbody>
+</table>
+
+<h2>F. Events by month</h2>
+<table>
+  <thead><tr><th>Month</th><th>Events</th><th>Confirmed registrations</th></tr></thead>
+  <tbody>
+  {% for m in months %}
+    <tr><td>{{ m._id }}</td><td>{{ m.eventCount }}</td><td>{{ m.registrations }}</td></tr>
+  {% else %}<tr><td colspan="3" class="empty">No data.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

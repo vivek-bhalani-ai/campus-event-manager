@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Campus activity</h1>
+
+<section class="cards">
+  <div class="card"><span class="figure">{{ stats.userCount }}</span><span>Users</span></div>
+  <div class="card"><span class="figure">{{ stats.eventCount }}</span><span>Events</span></div>
+  <div class="card"><span class="figure">{{ stats.upcomingCount }}</span><span>Upcoming events</span></div>
+  <div class="card"><span class="figure">{{ stats.registrationCount }}</span><span>Registrations</span></div>
+</section>
+
+<h2>Next five events</h2>
+{% if stats.nextEvents %}
+<table>
+  <thead><tr><th>Title</th><th>Category</th><th>Starts</th><th>Where</th><th>Confirmed</th></tr></thead>
+  <tbody>
+  {% for e in stats.nextEvents %}
+    <tr>
+      <td><a href="{{ url_for('events.detail', event_id=e._id) }}">{{ e.title }}</a></td>
+      <td>{{ e.category }}</td>
+      <td>{{ e.startDate|dt }}</td>
+      <td>{{ e.location.building }} &middot; {{ e.location.room }}</td>
+      <td>{{ e.confirmedCount }} / {{ e.capacity }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty">No upcoming events yet. Create one from the Events page.</p>
+{% endif %}
+
+<h2>Most popular event</h2>
+{% if stats.mostPopular %}
+<div class="panel">
+  <h3><a href="{{ url_for('events.detail', event_id=stats.mostPopular._id) }}">{{ stats.mostPopular.title }}</a></h3>
+  <p>{{ stats.mostPopular.category }} &middot; {{ stats.mostPopular.confirmedCount }} confirmed
+     of {{ stats.mostPopular.capacity }} seats ({{ stats.mostPopular.occupancy }}%)</p>
+</div>
+{% else %}
+<p class="empty">No events recorded yet.</p>
+{% endif %}
+{% endblock %}

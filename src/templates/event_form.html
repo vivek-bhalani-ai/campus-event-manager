@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{% if mode == 'edit' %}Edit event{% else %}New event{% endif %}</h1>
+
+<form class="stack" method="post">
+  <label>Title
+    <input name="title" required value="{{ event.title if event else '' }}">
+  </label>
+  <label>Description
+    <textarea name="description" rows="3">{{ event.description if event else '' }}</textarea>
+  </label>
+  <label>Category
+    <input name="category" required value="{{ event.category if event else '' }}"
+           placeholder="Workshop, Talk, Hackathon...">
+  </label>
+  <label>Tags (comma separated)
+    <input name="tags" value="{{ event.tags|join(', ') if event and event.tags is iterable and event.tags is not string else '' }}">
+  </label>
+
+  <fieldset>
+    <legend>Location (embedded object)</legend>
+    <label>Building <input name="building" required value="{{ event.location.building if event and event.location else '' }}"></label>
+    <label>Room <input name="room" required value="{{ event.location.room if event and event.location else '' }}"></label>
+    <label>Campus <input name="campus" required value="{{ event.location.campus if event and event.location else '' }}"></label>
+  </fieldset>
+
+  <label>Start date
+    <input type="datetime-local" name="startDate" required
+           value="{{ event.startDate.strftime('%Y-%m-%dT%H:%M') if event and event.startDate else '' }}">
+  </label>
+  <label>End date
+    <input type="datetime-local" name="endDate" required
+           value="{{ event.endDate.strftime('%Y-%m-%dT%H:%M') if event and event.endDate else '' }}">
+  </label>
+  <label>Capacity
+    <input type="number" name="capacity" min="1" required value="{{ event.capacity if event else 20 }}">
+  </label>
+  <label>Organiser
+    <select name="organizerId" required>
+      {% for u in organizers %}
+        <option value="{{ u._id }}"
+          {% if event and event.organizerId and event.organizerId|string == u._id|string %}selected{% endif %}>
+          {{ u.firstName }} {{ u.lastName }} ({{ u.email }})
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <div class="row">
+    <button type="submit">{% if mode == 'edit' %}Save changes{% else %}Create event{% endif %}</button>
+    <a class="reset" href="{{ url_for('events.index') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

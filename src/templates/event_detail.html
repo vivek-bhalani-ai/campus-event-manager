@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row-between">
+  <h1>{{ event.title }}
+    {% if event.confirmedCount >= event.capacity %}<span class="badge badge-full">Full</span>{% endif %}
+  </h1>
+  <a class="button" href="{{ url_for('events.edit', event_id=event._id) }}">Edit</a>
+</div>
+
+<p>{{ event.description }}</p>
+
+<section class="panel">
+  <dl class="detail-grid">
+    <dt>Category</dt><dd>{{ event.category }}</dd>
+    <dt>Tags</dt><dd>{% for t in event.tags %}<span class="tag">{{ t }}</span>{% endfor %}</dd>
+    <dt>Starts</dt><dd>{{ event.startDate|dt }}</dd>
+    <dt>Ends</dt><dd>{{ event.endDate|dt }}</dd>
+    <dt>Location</dt><dd>{{ event.location.building }}, room {{ event.location.room }}, {{ event.location.campus }} campus</dd>
+    <dt>Organiser</dt>
+    <dd>{% if event.organizer %}
+      <a href="{{ url_for('users.detail', user_id=event.organizer._id) }}">
+        {{ event.organizer.firstName }} {{ event.organizer.lastName }}</a>
+      &middot; {{ event.organizer.department }}
+    {% else %}Unknown{% endif %}</dd>
+    <dt>Capacity</dt><dd>{{ event.capacity }}</dd>
+    <dt>Confirmed</dt><dd>{{ event.confirmedCount }}</dd>
+    <dt>Occupancy</dt><dd>{{ event.occupancy }}%</dd>
+  </dl>
+</section>
+
+<h2>Register a participant</h2>
+<form class="filters" method="post" action="{{ url_for('events.register', event_id=event._id) }}">
+  <select name="userId" required>
+    {% for u in candidates %}
+      <option value="{{ u._id }}">{{ u.firstName }} {{ u.lastName }} ({{ u.email }})</option>
+    {% endfor %}
+  </select>
+  <select name="status">
+    <option value="confirmed">Confirmed</option>
+    <option value="waiting">Waiting list</option>
+  </select>
+  <button type="submit">Register</button>
+</form>
+
+<h2>Participants ({{ event.participantRows|length }})</h2>
+<table>
+  <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for row in event.participantRows %}
+    <tr>
+      <td>{% if row.user %}
+            <a href="{{ url_for('users.detail', user_id=row.user._id) }}">{{ row.user.firstName }} {{ row.user.lastName }}</a>
+          {% else %}Deleted user{% endif %}</td>
+      <td>{{ row.user.email if row.user else '-' }}</td>
+      <td><span class="badge badge-{{ row.status }}">{{ row.status }}</span></td>
+      <td>{{ row.registeredAt|dt }}</td>
+      <td class="actions">
+        {% if row.status != 'cancelled' %}
+        <form method="post" action="{{ url_for('events.cancel', event_id=event._id, user_id=row.userId) }}">
+          <button class="link-button" type="submit">Cancel</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{{ url_for('events.remove', event_id=event._id, user_id=row.userId) }}"
+              onsubmit="return confirm('Remove this registration completely?')">
+          <button class="link-button" type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="empty">Nobody is registered yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row-between">
+  <h1>Users</h1>
+  <a class="button" href="{{ url_for('users.create') }}">New user</a>
+</div>
+
+<form class="filters" method="get">
+  <input type="search" name="search" placeholder="Search by name or email" value="{{ filters.get('search', '') }}">
+  <select name="department">
+    <option value="">All departments</option>
+    {% for d in departments %}
+      <option value="{{ d }}" {% if filters.get('department') == d %}selected{% endif %}>{{ d }}</option>
+    {% endfor %}
+  </select>
+  <select name="role">
+    <option value="">All roles</option>
+    {% for r in ['student', 'teacher', 'staff'] %}
+      <option value="{{ r }}" {% if filters.get('role') == r %}selected{% endif %}>{{ r }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Apply</button>
+  <a class="reset" href="{{ url_for('users.index') }}">Reset</a>
+</form>
+
+<table>
+  <thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Role</th><th>Interests</th><th>Registrations</th><th></th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td><a href="{{ url_for('users.detail', user_id=u._id) }}">{{ u.firstName }} {{ u.lastName }}</a></td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.department }}</td>
+      <td>{{ u.role }}</td>
+      <td>{% for i in u.interests %}<span class="tag">{{ i }}</span>{% endfor %}</td>
+      <td>{{ u.registrationCount }}</td>
+      <td class="actions"><a href="{{ url_for('users.edit', user_id=u._id) }}">Edit</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7" class="empty">No user matches these filters.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

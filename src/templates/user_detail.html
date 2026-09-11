@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row-between">
+  <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+  <a class="button" href="{{ url_for('users.edit', user_id=user._id) }}">Edit</a>
+</div>
+
+<section class="panel">
+  <dl class="detail-grid">
+    <dt>Email</dt><dd>{{ user.email }}</dd>
+    <dt>Department</dt><dd>{{ user.department }}</dd>
+    <dt>Role</dt><dd>{{ user.role }}</dd>
+    <dt>Interests</dt><dd>{% for i in user.interests %}<span class="tag">{{ i }}</span>{% else %}None recorded{% endfor %}</dd>
+    <dt>Member since</dt><dd>{{ user.createdAt|dt }}</dd>
+  </dl>
+</section>
+
+<section class="cards">
+  <div class="card"><span class="figure">{{ history|length }}</span><span>Registrations</span></div>
+  <div class="card"><span class="figure">{{ upcoming_count }}</span><span>Upcoming</span></div>
+  <div class="card"><span class="figure">{{ past_count }}</span><span>Past</span></div>
+</section>
+
+<h2>Event history</h2>
+<table>
+  <thead><tr><th>Event</th><th>Category</th><th>Starts</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for row in history %}
+    <tr>
+      <td><a href="{{ url_for('events.detail', event_id=row._id) }}">{{ row.title }}</a></td>
+      <td>{{ row.category }}</td>
+      <td>{{ row.startDate|dt }}</td>
+      <td><span class="badge badge-{{ row.status }}">{{ row.status }}</span></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="empty">This user has not registered for any event yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Delete this user</h2>
+<p class="hint">Deletion is blocked while the user organises an event. If the user only has
+registrations, they can be removed together with the account.</p>
+<form class="row" method="post" action="{{ url_for('users.delete', user_id=user._id) }}"
+      onsubmit="return confirm('Delete this user?')">
+  <button type="submit">Delete user</button>
+  <button type="submit" name="cascade" value="1">Delete with registrations</button>
+</form>
+{% endblock %}
